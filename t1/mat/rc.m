@@ -1,75 +1,66 @@
-close all
-clear all
-
-%%EXAMPLE SYMBOLIC COMPUTATIONS
-
+clear
 pkg load symbolic
 
-syms t
-syms R
-syms C
-syms vi(t)
-syms vo(t)
-syms i(t)
-
-i(t)=C*diff(vo,t)
-
-printf("\n\nKVL equation:\n");
-
-vi(t) = R*i(t)+vo(t)
-
-syms vo_n(t) %natural solution
-syms vo_f(t) %forced solution
-
-printf("\n\nSolution is of the form");
-
-v(t) = vo_n(t) + vo_f(t)
-
-printf("\n\nNatural solution:\n");
-syms A
-syms wn
-
-vi(t) = 0 %no excitation
-i_n(t) = C*diff(vo_n, t)
+syms R1
+syms R2
+syms R3
+syms R4
+syms R5
+syms R6
+syms R7
 
 
-printf("\n\n Natural solution is of the form");
-vo_n(t) = A*exp(wn*t)
-
-R*i_n(t)+vo_n(t) == 0
-
-R*C*wn*vo_n(t)+vo_n(t) == 0
-
-R*C*wn+1==0
-
-solve(ans, wn)
+syms V1
+syms V2
+syms V3
+syms V4
+syms V5
+syms V6
+syms V7
 
 
-%%EXAMPLE NUMERIC COMPUTATIONS
 
-R=1e3 %Ohm
-C=100e-9 %F
+syms Va
+syms Vc
 
-f = 1000 %Hz
-w = 2*pi*f; %rad/s
+syms Ib
+syms Id
 
-%time axis: 0 to 10ms with 1us steps
-t=0:1e-6:10e-3; %s
+syms Ic
+syms Vb
 
-Zc = 1/(j*w*C)
-Cgain = Zc/(R+Zc)
-Gain = abs(Cgain)
-Phase = angle(Cgain)
+syms Kc
+syms Kb
 
-vi = 1*cos(w*t);
-vo = Gain*cos(w*t+Phase);
+syms Ia
 
-hf = figure ();
-plot (t*1000, vi, "g");
-hold on;
-plot (t*1000, vo, "b");
+R1 = 1.03979919241 *1000
+R2 = 2.07348604745 *1000
+R3 = 3.03922290863 *1000
+R4 = 4.02471521851 *1000
+R5 = 3.10131083327 *1000
+R6 = 2.05714481184 *1000
+R7 = 1.00418069758 *1000
+Va = 5.21434780409 
+Id = 1.04967525215 *0.001
+Kb = 7.12406804899 *0.001
+Kc = 8.07016964594 *1000
 
-xlabel ("t[ms]");
-ylabel ("vi(t), vo(t) [V]");
-print (hf, "forced.eps", "-depsc");
-%print forced.eps
+
+Vc = Kc * Ic
+
+%A = [R3,-1+1/(Kb*R3),0;R4+R3+R1,-R3,-R4;-R4,0,R6+R7+R4-Kc]
+A = [-R3*Kb,(1-Kb*R3),0;R4+R3+R1,R3,R4;R4,0,R6+R7+R4-Kc]
+B = [0;Va;0]
+
+C=[Kc/R6,0,1,-Kc/R6,0,0,0;0,0,0,-1,0,0,1;-1/R6,0,-1/R4,1/R6+1/R4,0,-1/R1,1/R1;1/R7+1/R6,0,0,-1/R6,0,0,0;0,1/R5,-1/R5-Kb,0,0,Kb,0;0,0,Kb,0,1/R2,-1/R2-Kb,0;0,0,-1/R3,0,-1/R2,1/R3+1/R2+1/R1,-1/R1]
+D=[0;Va;0;0;Id;0;0]
+
+%E=[1/R7,-1/R7-Kc/R6,0,0,0,0,0;0,0,1/R5,-1/R5-Kb,0,Kb,0;-1/R7,1/R6+1/R7,0,0,0,0,0;0,Kc/R6,-1/R5,1/R3+1/R4+1/R5,0,-1/R3,0;0,0,0,Kb,1/R2,-1/R2-Kb,0;0,0,0,-1/R3,-1/R2,1/R1+1/R2+1/R3,-1/R1;0,0,0,0,0,0,1]
+%F=[-Id;Id;0;0;0;0;Va]
+
+%A = [R4+R3+R1,-R4;-R4,R6+R7+R4]
+%B = [-Va+R3*Ib;Vc]
+ans = A\B
+ans = C\D
+%E\F
